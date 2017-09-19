@@ -1,5 +1,3 @@
-# psql -h 0.0.0.0 -U postgres -d temp -f schema.sql
-
 CREATE TABLE logins (
   id          BIGSERIAL PRIMARY KEY NOT NULL,
   email       VARCHAR(255),
