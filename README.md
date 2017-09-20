@@ -8,4 +8,6 @@ watch -n 0.5 ./build.sh
 http :3333
 https://github.com/tockins/realize
 realize run --legacy
+http POST :3333/logins email=a meta=b password=c pin=d
+http GET  :3333/logins
 ```

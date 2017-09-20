@@ -27,7 +27,8 @@ func main() {
 func server() {
 	e := echo.New()
 	e.GET("/", home)
-	e.GET("/logins", logins)
+	e.GET("/logins", index)
+	e.POST("/logins", create)
 	e.Logger.Fatal(e.Start(":3333"))
 }
 
@@ -51,7 +52,7 @@ func home(c echo.Context) error {
 	return c.String(http.StatusOK, "hello world")
 }
 
-func logins(c echo.Context) error {
+func index(c echo.Context) error {
 	db := connect()
 	rows := query(db, "SELECT * FROM logins")
 	defer rows.Close()
@@ -64,4 +65,12 @@ func logins(c echo.Context) error {
 		ls = append(ls, l)
 	}
 	return c.JSON(http.StatusOK, ls)
+}
+
+func create(c echo.Context) error {
+	l := new(Login)
+	if err := c.Bind(l); err != nil {
+		return c.String(http.StatusBadRequest, "Wrong Format")
+	}
+	return c.JSON(http.StatusOK, l)
 }
