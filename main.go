@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
 	"net/http"
@@ -64,7 +63,5 @@ func logins(c echo.Context) error {
 		rows.Scan(&l.ID, &l.Email, &l.Username, &l.Password, &l.Pin, &l.Site, &l.Meta, &l.CreatedAt)
 		ls = append(ls, l)
 	}
-	fmt.Printf("ls: %#v", ls)
-
 	return c.JSON(http.StatusOK, ls)
 }
