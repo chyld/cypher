@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
+	"net/http"
 	"time"
 )
 
@@ -19,6 +21,12 @@ type login struct {
 }
 
 func main() {
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+	e.Logger.Fatal(e.Start(":3333"))
+
 	db, err := sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp?sslmode=disable")
 	fmt.Printf("db: %#v, err: %#v", db, err)
 	rows, err := db.Query("SELECT * FROM logins")
