@@ -20,27 +20,30 @@ type Login struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+var db *sql.DB
+
 func main() {
 	server()
 }
 
 func server() {
 	e := echo.New()
+	e.Debug = true
 	e.GET("/", home)
 	e.GET("/logins", index)
 	e.POST("/logins", create)
 	e.Logger.Fatal(e.Start(":3333"))
 }
 
-func connect() *sql.DB {
-	db, err := sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp?sslmode=disable")
+func connect() {
+	var err error
+	db, err = sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp?sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
-	return db
 }
 
-func query(db *sql.DB, sql string) *sql.Rows {
+func query(sql string) *sql.Rows {
 	rows, err := db.Query(sql)
 	if err != nil {
 		panic(err)
@@ -53,8 +56,8 @@ func home(c echo.Context) error {
 }
 
 func index(c echo.Context) error {
-	db := connect()
-	rows := query(db, "SELECT * FROM logins")
+	connect()
+	rows := query("SELECT * FROM logins")
 	defer rows.Close()
 	defer db.Close()
 
@@ -68,9 +71,18 @@ func index(c echo.Context) error {
 }
 
 func create(c echo.Context) error {
+	connect()
+	defer db.Close()
+
 	l := new(Login)
 	if err := c.Bind(l); err != nil {
-		return c.String(http.StatusBadRequest, "Wrong Format")
+		return c.String(http.StatusBadRequest, "Could not bind JSON to struct")
 	}
-	return c.JSON(http.StatusOK, l)
+
+	_, err := db.Exec("INSERT INTO logins (email, username, password, pin, site, meta, created_at) VALUES($1, $2, $3, $4, $5, $6, $7)", l.Email, l.Username, l.Password, l.Pin, l.Site, l.Meta, time.Now())
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Could not insert record into database")
+	}
+
+	return c.JSON(http.StatusOK, "Insert successful")
 }
