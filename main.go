@@ -22,8 +22,8 @@ type login struct {
 
 func main() {
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	e.GET("/logins", func(c echo.Context) error {
+		return c.String(http.StatusOK, "logins lolz 4")
 	})
 	e.Logger.Fatal(e.Start(":3333"))
 
