@@ -19,6 +19,7 @@ type login struct {
 }
 
 func main() {
+	var x int
 	db, err := sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp")
 	fmt.Printf("db: %#v, err: %#v", db, err)
 }
