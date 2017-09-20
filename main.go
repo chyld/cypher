@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-type login struct {
+// Login struct
+type Login struct {
 	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
 	Username  string    `json:"username"`
@@ -21,21 +22,49 @@ type login struct {
 }
 
 func main() {
-	e := echo.New()
-	e.GET("/logins", func(c echo.Context) error {
-		return c.String(http.StatusOK, "logins lolz 4")
-	})
-	e.Logger.Fatal(e.Start(":3333"))
+	server()
+}
 
+func server() {
+	e := echo.New()
+	e.GET("/", home)
+	e.GET("/logins", logins)
+	e.Logger.Fatal(e.Start(":3333"))
+}
+
+func connect() *sql.DB {
 	db, err := sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp?sslmode=disable")
-	fmt.Printf("db: %#v, err: %#v", db, err)
-	rows, err := db.Query("SELECT * FROM logins")
-	fmt.Printf("rows: %#v, err: %#v", rows, err)
-	for rows.Next() {
-		l := login{}
-		err := rows.Scan(&l.ID, &l.Email, &l.Username, &l.Password, &l.Pin, &l.Site, &l.Meta, &l.CreatedAt)
-		fmt.Printf("\n\n\nerr: %#v, login: %#v", err, l)
-		y, m, d := l.CreatedAt.Date()
-		fmt.Printf("\n\n\ny: %#v, m: %#v, d: %#v", y, m, d)
+	if err != nil {
+		panic(err)
 	}
+	return db
+}
+
+func query(db *sql.DB, sql string) *sql.Rows {
+	rows, err := db.Query(sql)
+	if err != nil {
+		panic(err)
+	}
+	return rows
+}
+
+func home(c echo.Context) error {
+	return c.String(http.StatusOK, "hello world")
+}
+
+func logins(c echo.Context) error {
+	db := connect()
+	rows := query(db, "SELECT * FROM logins")
+	defer rows.Close()
+	defer db.Close()
+
+	ls := make([]*Login, 0)
+	for rows.Next() {
+		l := new(Login)
+		rows.Scan(&l.ID, &l.Email, &l.Username, &l.Password, &l.Pin, &l.Site, &l.Meta, &l.CreatedAt)
+		ls = append(ls, l)
+	}
+	fmt.Printf("ls: %#v", ls)
+
+	return c.JSON(http.StatusOK, ls)
 }
