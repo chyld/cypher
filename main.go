@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
-	"github.com/labstack/echo"
-	_ "github.com/lib/pq"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	_ "github.com/lib/pq"
 )
 
 // Login struct
@@ -28,6 +30,7 @@ func main() {
 
 func server() {
 	e := echo.New()
+	e.Use(middleware.CORS())
 	e.Debug = true
 	e.GET("/", home)
 	e.GET("/logins", index)
@@ -37,7 +40,7 @@ func server() {
 
 func connect() {
 	var err error
-	db, err = sql.Open("postgres", "postgres://postgres:pass1234@localhost/temp?sslmode=disable")
+	db, err = sql.Open("postgres", "postgres://postgres:pass1234@localhost/cypher?sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
